@@ -287,8 +287,6 @@ int crear_inodo(const char *path, size_t size, mode_t modo, int es_fichero){
           
           
           for(int j=0; j<strlen(get_name_form_path(path)); j++) {
-            ////printf("CHAR %s\n",sb->lista_inode[i]->nombre);
-            ////printf("---------------------------------------------\n");
             
             sb->lista_inode[i]->nombre[j] = get_name_form_path(path)[j];
           }
@@ -301,7 +299,6 @@ int crear_inodo(const char *path, size_t size, mode_t modo, int es_fichero){
         sb->lista_inode[i]->id = i;
         strcpy(sb->lista_inode[i]->path,path);
         sb->lista_inode[i]->cantidad_punteros = (int)size;
-        //nuevo_inode->punteros = (int*)malloc(sizeof(int)*(int)size);
         sb->lista_inode[i]->permisos = modo;
         sb->lista_inode[i]->es_fichero = es_fichero;
         sb->lista_inode[i]->fecha_creacion = time(NULL);
@@ -322,12 +319,8 @@ int crear_inodo(const char *path, size_t size, mode_t modo, int es_fichero){
 
 
 static int my_mkdir(const char* path, mode_t mode) {
-  //printf("El path es: %s y es largo es: %li\n",path,strlen(path));
   int father_id = find_i_father(path);
-  //printf("El id del padre es: %i\n",father_id);
-  //char name[] = get_name_form_path(path);
-  //strcpy(name,get_name_form_path(path));
-  //printf("El nombre es: %s\n", get_name_form_path(path));
+
 
   for(int i=0; i<100; i++) {
     if(sb->lista_inode[i]->nombre == get_name_form_path(path) && sb->lista_inode[i]->padre[0] == father_id) {
@@ -338,13 +331,11 @@ static int my_mkdir(const char* path, mode_t mode) {
   int new;
 
   new = crear_inodo(path, mode, 0, 1);
-  ////printf("newnode es: %i\n",new);
   for(int i = 0; i<100; i++) {
     sb->lista_inode[new]->hijos[i] = -1;
   }
 
   sb->lista_inode[new]->padre[0] = father_id;
-  //lista_inode[new] = sb->lista_inode[new];
 
   file_to_sb(new);
   actualizar();
@@ -355,51 +346,38 @@ static int my_mkdir(const char* path, mode_t mode) {
 
 static int my_rmdir(const char* path) {
   int father_id = find_i_father(path);
-  //printf("Sí entra.....................\n");
+  
   for(int i=0; i<100; i++) {
     if(sb->lista_inode[i] == NULL) continue;
-    //printf("El nombre en sb: %s .... y el nombre en func: %s\n",sb->lista_inode[i]->nombre,get_name_form_path(sb->lista_inode[i]->path));
-    //printf("father_id: %i  ....  el NPE: %i\n",father_id,sb->lista_inode[i]->padre[0]);
-    //printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
-    
+
     if(strcmp(sb->lista_inode[i]->nombre,get_name_form_path(path)) == 0 && sb->lista_inode[i]->padre[0] == father_id) {
-      //printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!-----------\n");
       for(int j=0; j<100; j++) {
-        //if(sb->lista_inode[i]->hijos[j] == NULL) continue;
-        //printf("El i: %i  ............... el valor: %i\n",j,lista_inode[i].hijos[j]);
         if(lista_inode[i].hijos[j] != -1) return -1;// No se puede eliminar el fichero porque tinen hijos
       }
-      //printf("Me lleva la puta!!!!!!!!!!!!!!!11\n");
       sb->lista_inode[i]->id = -1;
-      //sb->lista_inode[i] = NULL;
       file_to_sb(i);
       actualizar();
       return 0;
     }
   }
-  //printf("Aquí está mal!!!!!!!!!!!!!!!11\n");
   return -1; //El fichero no existe
 }
 
 static int my_readdir( const char* path, void* buf, fuse_fill_dir_t filler, off_t offset, struct fuse_file_info* fi ) {
     
-  //const char *, void *, fuse_fill_dir_t, off_t,struct fuse_file_info *
   filler( buf, ".", NULL, 0 ); // Actual
   filler( buf, "..", NULL, 0 ); // Padre
 
-  //printf("%s",path);
+
 
     for ( int curr_idx = 0; curr_idx < 100; curr_idx++ ){
-      //printf("El indice es: %i\n",curr_idx);
+ 
       printf("El padre sefun: %i\n",find_i_father(path));
       if(sb->lista_inode[curr_idx] != NULL && sb->lista_inode[curr_idx]->padre[0] == find_i_father(path)) {
         if(sb->lista_inode[curr_idx]->id != -1){
 
-          //if(sb->lista_inode[curr_idx] != NULL){
             filler( buf, sb->lista_inode[curr_idx]->nombre, NULL, 0 );
-            //printf("Es: %s\n",sb->lista_inode[curr_idx]->nombre);
-          //}
-          //printf("Aquí???????????????????????????\n");
+ 
         }
       }
     }
@@ -585,7 +563,6 @@ static int my_write(const char *path, const char *buffer, size_t size, off_t off
     SaveBMP("disco.bmp",&header,imgdata);
     actualizar();
   
-  //fwrite("halo3.bmp",sizeof(sb->imgdata),(size_t)108,sb->imgdata);
 	return size;
 }
 
